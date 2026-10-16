@@ -6,8 +6,6 @@
 
 
 function Save-Commit([string]$Message, [string[]]$Paths) {
-$api   = "Part2/RaceDay.Api"
-$tests = "Part2/RaceDay.Api.Tests"
 
 Save-Commit "Add Part 1 plan, ERD and SQL script"                 @("Part1")
 Save-Commit "Add .gitignore for .NET projects"                    @(".gitignore")
