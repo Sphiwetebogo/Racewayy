@@ -5,7 +5,7 @@
 
 
 
-function Save-Commit([string]$Message, [string[]]$Paths) {
+
 
 Save-Commit "Add Part 1 plan, ERD and SQL script"                 @("Part1")
 Save-Commit "Add .gitignore for .NET projects"                    @(".gitignore")
