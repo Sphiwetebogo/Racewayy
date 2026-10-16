@@ -1,1 +1,49 @@
+# Creates the RaceDay Part 2 history as separate, meaningful commits (one per piece of work).
+# Run from the repo root (the folder that contains Part2, .github and .gitignore):
+#   powershell -ExecutionPolicy Bypass -File .\make-commits.ps1
 
+$ErrorActionPreference = "Stop"
+
+if (-not (Test-Path ".git")) { git init; git branch -M main }
+
+function Save-Commit([string]$Message, [string[]]$Paths) {
+    $existing = $Paths | Where-Object { Test-Path $_ }
+    if (-not $existing) { Write-Host "Skipped (files not found): $Message"; return }
+    git add -- $existing
+    git diff --cached --quiet
+    if ($LASTEXITCODE -eq 0) { Write-Host "Skipped (nothing new): $Message"; return }
+    git commit -m $Message | Out-Null
+    Write-Host "Committed: $Message"
+}
+
+$api   = "Part2/RaceDay.Api"
+$tests = "Part2/RaceDay.Api.Tests"
+
+Save-Commit "Add Part 1 plan, ERD and SQL script"                 @("Part1")
+Save-Commit "Add .gitignore for .NET projects"                    @(".gitignore")
+Save-Commit "Create solution and Web API project"                 @("Part2/RaceDay.sln", "$api/RaceDay.Api.csproj", "$api/appsettings.json", "$api/Properties/launchSettings.json")
+Save-Commit "Add entities matching the Part 1 schema"             @("$api/Models/Entities.cs")
+Save-Commit "Add EF Core DbContext and relationships"             @("$api/Data/AppDbContext.cs")
+Save-Commit "Add updated SQL script with event distance and type" @("Part2/database")
+Save-Commit "Add request DTOs with validation"                    @("$api/Dtos/Requests.cs")
+Save-Commit "Add response DTOs and query mappings"                @("$api/Dtos/Responses.cs", "$api/Dtos/Mappings.cs")
+Save-Commit "Add salted PBKDF2 password hashing"                  @("$api/Services/PasswordService.cs")
+Save-Commit "Add session keys and session authentication handler" @("$api/Services/SessionKeys.cs", "$api/Services/SessionAuthenticationHandler.cs")
+Save-Commit "Add base controller and auth endpoints"              @("$api/Controllers/ApiControllerBase.cs", "$api/Controllers/AuthController.cs")
+Save-Commit "Add user profile endpoints"                          @("$api/Controllers/UsersController.cs")
+Save-Commit "Add event management endpoints"                      @("$api/Controllers/EventsController.cs")
+Save-Commit "Add category endpoints"                              @("$api/Controllers/CategoriesController.cs")
+Save-Commit "Add enrolment endpoints"                             @("$api/Controllers/EnrolmentsController.cs")
+Save-Commit "Add race result endpoints"                           @("$api/Controllers/ResultsController.cs")
+Save-Commit "Configure sessions, Swagger and database start-up"   @("$api/Program.cs")
+Save-Commit "Add test project, test factory and password tests"   @("$tests/RaceDay.Api.Tests.csproj", "$tests/RaceDayApiFactory.cs", "$tests/TestHelpers.cs", "$tests/PasswordServiceTests.cs")
+Save-Commit "Add registration, login and profile tests"           @("$tests/AuthTests.cs", "$tests/UserProfileTests.cs")
+Save-Commit "Add event and category tests"                        @("$tests/EventTests.cs", "$tests/CategoryTests.cs")
+Save-Commit "Add enrolment and result tests"                      @("$tests/EnrolmentTests.cs", "$tests/ResultTests.cs")
+Save-Commit "Add GitHub Actions workflow to build and test"       @(".github")
+Save-Commit "Add README with setup, roles and endpoints"          @("README.md")
+
+Write-Host ""
+Write-Host "Done. Commits so far:"
+git rev-list --count HEAD
+Write-Host "Next: git remote add origin https://github.com/YOUR-USERNAME/RaceDay.git  then  git push -u origin main"
