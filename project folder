@@ -6,15 +6,6 @@
 
 
 function Save-Commit([string]$Message, [string[]]$Paths) {
-    $existing = $Paths | Where-Object { Test-Path $_ }
-    if (-not $existing) { Write-Host "Skipped (files not found): $Message"; return }
-    git add -- $existing
-    git diff --cached --quiet
-    if ($LASTEXITCODE -eq 0) { Write-Host "Skipped (nothing new): $Message"; return }
-    git commit -m $Message | Out-Null
-    Write-Host "Committed: $Message"
-}
-
 $api   = "Part2/RaceDay.Api"
 $tests = "Part2/RaceDay.Api.Tests"
 
